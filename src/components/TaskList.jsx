@@ -1,30 +1,48 @@
 import { useEffect } from "react";
-import { View, FlatList, Animated } from "react-native";
+import { Animated, View, FlatList } from "react-native";
 import { S } from "../styles/styles";
 import TaskItem from "./TaskItem";
 import EmptyList from "./EmptyList";
-import { useFadeIn, useScaleIn } from "../hooks/useAnimations";
+import { useItemAnimations } from "../hooks/useAnimations";
 
+export default function TaskList({
+  data,
+  onToggle,
+  onEdit,
+  onDelete,
+  onAfterAddRef 
+}) {
+  const { style, enter, exit } = useItemAnimations();
 
-export default function TaskList({ data, onToggle, onRemove, onEdit }) {
-const { opacity, run: fadeIn } = useFadeIn();
-const { scale, run: scaleIn } = useScaleIn();
+  useEffect(() => {
+    if (onAfterAddRef) {
+      onAfterAddRef.current = (id) => enter(id);
+    }
+  }, [onAfterAddRef, enter]);
 
+  const renderItem = ({ item }) => {
+    return (
+      <Animated.View style={[S.item, style(item.id)]}>
+        <TaskItem
+          item={item}
+          onToggle={onToggle}
+          onEdit={onEdit}
+          onDelete={(id) => exit(id, () => onDelete(id))}
+        />
+      </Animated.View>
+    );
+  };
 
-useEffect(() => { fadeIn(); scaleIn(); }, [data.length]);
-
-
-return (
-<Animated.View style={[S.list, { opacity, transform: [{ scale }] }]}>
-<FlatList
-data={data}
-keyExtractor={(item) => item.id}
-ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-renderItem={({ item }) => (
-<TaskItem item={item} onToggle={onToggle} onRemove={onRemove} onEdit={onEdit} />
-)}
-ListEmptyComponent={<EmptyList />}
-/>
-</Animated.View>
-);
+  return (
+    <FlatList
+      data={data}
+      keyExtractor={(item) => item.id}
+      renderItem={renderItem}
+      style={S.list}
+      contentContainerStyle={S.listContent}
+      showsVerticalScrollIndicator={false}
+      ItemSeparatorComponent={() => <View style={{ height: 0 }} />}
+      ListEmptyComponent={<EmptyList />}
+    />
+  );
 }

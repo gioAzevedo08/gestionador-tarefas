@@ -1,45 +1,45 @@
 import { useEffect, useState } from "react";
 import { View, TextInput, TouchableOpacity, Text } from "react-native";
 import { S } from "../styles/styles";
+import { TEXTS } from "../utils/constants";
 
+export default function TaskForm({
+  onSubmit,            // (texto, onAfterAddAnim) => void
+  onClearDone,         // () => void (passado via withExitAnim)
+  isEditing,           // boolean
+  editingTaskTitle,    // string | undefined
+  hasDone              // boolean (tem concluídas?)
+}) {
+  const [value, setValue] = useState("");
 
-export default function TaskForm({ onAdd, editing, onConfirmEdit, onCancelEdit }) {
-const [value, setValue] = useState("");
+  useEffect(() => {
+    if (isEditing) setValue(editingTaskTitle ?? "");
+  }, [isEditing, editingTaskTitle]);
 
+  const submit = () => {
+    onSubmit(value, (/* newId handled in TaskList */) => {});
+    setValue("");
+  };
 
-useEffect(() => {
-if (editing) setValue(editing.title);
-else setValue("");
-}, [editing]);
+  return (
+    <View style={S.form}>
+      <TextInput
+        style={S.input}
+        placeholder={TEXTS.placeholder}
+        value={value}
+        onChangeText={setValue}
+        onSubmitEditing={submit}
+      />
 
+      <TouchableOpacity style={S.btnAdd} onPress={submit}>
+        <Text style={S.btnAddText}>{isEditing ? TEXTS.update : TEXTS.add}</Text>
+      </TouchableOpacity>
 
-const handleSubmit = () => {
-if (editing) onConfirmEdit(editing.id, value.trim());
-else onAdd(value);
-setValue("");
-};
-
-
-return (
-<View style={[S.card, S.gap12]}>
-<TextInput
-placeholder={editing ? "Editando tarefa..." : "Digite uma nova tarefa"}
-placeholderTextColor="#727682"
-value={value}
-onChangeText={setValue}
-onSubmitEditing={handleSubmit}
-style={S.input}
-/>
-<View style={[S.row, S.gap8]}>
-<TouchableOpacity style={S.button} onPress={handleSubmit}>
-<Text style={S.buttonText}>{editing ? "Salvar" : "Adicionar"}</Text>
-</TouchableOpacity>
-{editing && (
-<TouchableOpacity style={[S.button, { backgroundColor: "#32323a" }]} onPress={onCancelEdit}>
-<Text style={S.buttonText}>Cancelar</Text>
-</TouchableOpacity>
-)}
-</View>
-</View>
-);
+      {hasDone && (
+        <TouchableOpacity style={S.btnClear} onPress={onClearDone}>
+          <Text style={S.btnClearText}>{TEXTS.clearDone}</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
 }

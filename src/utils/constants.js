@@ -1,21 +1,24 @@
 export const COLORS = {
-bg: "#0f0f12",
-card: "#1a1b20",
-primary: "#7c5cff",
-text: "#f5f6f8",
-muted: "#9aa0a6",
-danger: "#ff6374",
-success: "#3ad29f"
+  bg: "#f8f9fa",
+  card: "#ffffff",
+  primary: "#00b894",
+  text: "#2d3436",
+  muted: "#636e72",
+  border: "#ddd",
+  info: "#74b9ff",
+  danger: "#ff7675"
 };
-
 
 export const TEXTS = {
-title: "Gestionador de Tarefas",
-emptyTitle: "Nada por aqui ainda",
-emptySubtitle: "Adicione sua primeira tarefa!"
+  title: "📝 Lista de Tarefas",
+  placeholder: "Digite uma nova tarefa...",
+  empty: "Nenhuma tarefa ainda!\nAdicione sua primeira tarefa acima",
+  add: "Adicionar",
+  update: "Atualizar",
+  clearDone: "Limpar Concluídas",
+  pendingLabel: (n) => `${n} pendentes`,
 };
 
-
 export const STORAGE_KEYS = {
-tasks: "@gestionador/tasks"
+  tasks: "@gestionador/tasks"
 };

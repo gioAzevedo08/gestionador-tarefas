@@ -1,35 +1,23 @@
-# Gestionador de Tarefas 
+# Gestionador de Tarefas
 
-## Objetivo
-- Separar responsabilidades em **componentes** reutilizáveis
-- Encapsular **estado/CRUD** e **animações** em **hooks customizados**
-- **Centralizar estilos** em um único arquivo `styles.js`
-- **Isolar constantes** de UI e configuração
+Aplicativo de tarefas desenvolvido em **React Native (Expo)**, estruturado com **componentes reutilizáveis**, **hooks customizados**, **estilos centralizados** e **constantes isoladas**.
 
+## Componentes
+- **Header:** título e contador de tarefas pendentes.  
+- **TaskForm:** campo para criar ou editar tarefas e limpar concluídas.  
+- **TaskItem:** exibe tarefa com botões de editar e excluir.  
+- **TaskList:** renderiza lista com animações e estado vazio.  
+- **EmptyList:** mensagem quando não há tarefas.
 
-## Componentização
-- `Header`: título + chips de contagem (total/concluídas)
-- `TaskForm`: input para criar/editar tarefas
-- `TaskItem`: item individual com ações (toggle/editar/excluir)
-- `TaskList`: renderização com `FlatList` e separadores
-- `EmptyList`: feedback visual quando a lista está vazia
+## Hooks
+- **useTasks:** controla o estado, CRUD, persistência (`AsyncStorage`) e edição de tarefas.  
+- **useAnimations:** gerencia animações de entrada e saída com `Animated`.
 
+## Organização
+- **styles.js:** contém todos os estilos usando `StyleSheet.create`.  
+- **constants.js:** centraliza cores, textos e chaves de armazenamento.  
 
-## 🪝 Hooks Customizados
-- `useTasks`: gerencia o estado das tarefas, persistência com AsyncStorage e fluxo de edição.
-- API: `addTask, toggleTask, removeTask, startEdit, confirmEdit, cancelEdit, counters, tasks`
-- `useAnimations`: helpers de animação `fadeIn` e `scaleIn` (Animated API) usados em `TaskList`.
-
-
-## Estilos
-- `styles.js` usa `StyleSheet.create` para melhor performance e caching interno do RN.
-- Paleta e textos centralizados em `utils/constants.js`.
-
-
-##  Estrutura
-```text
-src/
-components/ (UI)
-hooks/ (lógica reutilizável)
-styles/ (estilos centralizados)
-utils/ (constantes e chaves)
+## Tecnologias
+- React Native (Expo)
+- AsyncStorage
+- Animated API

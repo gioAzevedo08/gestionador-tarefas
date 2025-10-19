@@ -2,83 +2,105 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { STORAGE_KEYS } from "../utils/constants";
 
-// Gera um ID aleatório simples
-const uid = () => Math.random().toString(36).slice(2, 9);
+const uid = () => Date.now().toString();
 
 export function useTasks() {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(null); // task em edição
+  const [tarefas, setTarefas] = useState([]);
+  const [editandoId, setEditandoId] = useState(null);
 
-  // Carrega tarefas salvas no AsyncStorage
+  // Carregar do storage
   useEffect(() => {
     (async () => {
       try {
         const raw = await AsyncStorage.getItem(STORAGE_KEYS.tasks);
-        if (raw) setTasks(JSON.parse(raw));
-      } catch (err) {
-        console.error("Erro ao carregar tarefas:", err);
-      } finally {
-        setLoading(false);
+        if (raw) setTarefas(JSON.parse(raw));
+      } catch (e) {
+        console.warn("Falha ao carregar tarefas:", e);
       }
     })();
   }, []);
 
-  // Salva alterações automaticamente
+  // Salvar no storage
   useEffect(() => {
-    AsyncStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(tasks));
-  }, [tasks]);
+    AsyncStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(tarefas));
+  }, [tarefas]);
 
-  // Adicionar nova tarefa
-  const addTask = useCallback((title) => {
-    if (!title?.trim()) return;
-    const t = { id: uid(), title: title.trim(), done: false, createdAt: Date.now() };
-    setTasks((prev) => [t, ...prev]);
-  }, []);
+  const adicionarOuAtualizar = useCallback((texto, onAfterAddAnim) => {
+    const t = (texto ?? "").trim();
+    if (!t) return;
 
-  // Marcar como concluída/não concluída
-  const toggleTask = useCallback((id) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t))
+    if (editandoId) {
+      setTarefas(prev =>
+        prev.map(x => (x.id === editandoId ? { ...x, texto: t } : x))
+      );
+      setEditandoId(null);
+    } else {
+      const nova = {
+        id: uid(),
+        texto: t,
+        concluida: false,
+        data: new Date().toLocaleTimeString()
+      };
+      setTarefas(prev => [nova, ...prev]);
+      // dispara animação no item recém-criado (TaskList chama onAfterAddAnim)
+      onAfterAddAnim?.(nova.id);
+    }
+  }, [editandoId]);
+
+  const alternarConclusao = useCallback((id) => {
+    setTarefas(prev =>
+      prev.map(x => (x.id === id ? { ...x, concluida: !x.concluida } : x))
     );
   }, []);
 
-  // Remover tarefa
-  const removeTask = useCallback((id) => {
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+  const remover = useCallback((id, withExitAnim) => {
+    // TaskList chama withExitAnim(id, () => setTarefas(...))
+    if (withExitAnim) {
+      withExitAnim(id, () => setTarefas(prev => prev.filter(x => x.id !== id)));
+    } else {
+      setTarefas(prev => prev.filter(x => x.id !== id));
+    }
   }, []);
 
-  // Iniciar e cancelar edição
-  const startEdit = useCallback((task) => setEditing(task), []);
-  const cancelEdit = useCallback(() => setEditing(null), []);
-
-  // Confirmar edição
-  const confirmEdit = useCallback((id, newTitle) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, title: newTitle } : t))
+  const limparConcluidas = useCallback((withExitAnim) => {
+    if (!withExitAnim) {
+      setTarefas(prev => prev.filter(x => !x.concluida));
+      return;
+    }
+    // anima e remove cada concluída
+    const concluidas = tarefas.filter(t => t.concluida);
+    concluidas.forEach(t =>
+      withExitAnim(t.id, () =>
+        setTarefas(prev => prev.filter(x => x.id !== t.id))
+      )
     );
-    setEditing(null);
-  }, []);
+  }, [tarefas]);
 
-  // Contadores (total e concluídas)
-  const counters = useMemo(
-    () => ({
-      total: tasks.length,
-      done: tasks.filter((t) => t.done).length,
-    }),
-    [tasks]
+  const iniciarEdicao = useCallback((id) => setEditandoId(id), []);
+  const cancelarEdicao = useCallback(() => setEditandoId(null), []);
+
+  const pendentes = useMemo(
+    () => tarefas.filter(t => !t.concluida).length,
+    [tarefas]
+  );
+
+  const tarefaSendoEditada = useMemo(
+    () => tarefas.find(t => t.id === editandoId) ?? null,
+    [tarefas, editandoId]
   );
 
   return {
-    tasks,
-    loading,
-    editing,
-    counters,
-    addTask,
-    toggleTask,
-    removeTask,
-    startEdit,
-    cancelEdit,
-    confirmEdit,
+    tarefas,
+    pendentes,
+    editandoId,
+    tarefaSendoEditada,
+
+    adicionarOuAtualizar,
+    alternarConclusao,
+    remover,
+    limparConcluidas,
+
+    iniciarEdicao,
+    cancelarEdicao
   };
 }
