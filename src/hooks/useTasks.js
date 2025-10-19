@@ -8,7 +8,7 @@ export function useTasks() {
   const [tarefas, setTarefas] = useState([]);
   const [editandoId, setEditandoId] = useState(null);
 
-  // Carregar do storage
+
   useEffect(() => {
     (async () => {
       try {
@@ -20,7 +20,7 @@ export function useTasks() {
     })();
   }, []);
 
-  // Salvar no storage
+
   useEffect(() => {
     AsyncStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(tarefas));
   }, [tarefas]);
@@ -42,7 +42,7 @@ export function useTasks() {
         data: new Date().toLocaleTimeString()
       };
       setTarefas(prev => [nova, ...prev]);
-      // dispara animação no item recém-criado (TaskList chama onAfterAddAnim)
+      
       onAfterAddAnim?.(nova.id);
     }
   }, [editandoId]);
@@ -54,7 +54,7 @@ export function useTasks() {
   }, []);
 
   const remover = useCallback((id, withExitAnim) => {
-    // TaskList chama withExitAnim(id, () => setTarefas(...))
+ 
     if (withExitAnim) {
       withExitAnim(id, () => setTarefas(prev => prev.filter(x => x.id !== id)));
     } else {
@@ -67,7 +67,7 @@ export function useTasks() {
       setTarefas(prev => prev.filter(x => !x.concluida));
       return;
     }
-    // anima e remove cada concluída
+    
     const concluidas = tarefas.filter(t => t.concluida);
     concluidas.forEach(t =>
       withExitAnim(t.id, () =>

@@ -1,7 +1,6 @@
 import { useRef } from "react";
 import { Animated } from "react-native";
 
-/** Animações por item: opacity 0→1 na entrada, 1→0 na saída com translateY */
 export function useItemAnimations() {
   const map = useRef(new Map()).current;
 

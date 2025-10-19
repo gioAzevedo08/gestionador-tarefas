@@ -4,11 +4,11 @@ import { S } from "../styles/styles";
 import { TEXTS } from "../utils/constants";
 
 export default function TaskForm({
-  onSubmit,            // (texto, onAfterAddAnim) => void
-  onClearDone,         // () => void (passado via withExitAnim)
-  isEditing,           // boolean
-  editingTaskTitle,    // string | undefined
-  hasDone              // boolean (tem concluídas?)
+  onSubmit,       
+  onClearDone,         
+  isEditing,           
+  editingTaskTitle,  
+  hasDone         
 }) {
   const [value, setValue] = useState("");
 
@@ -17,7 +17,7 @@ export default function TaskForm({
   }, [isEditing, editingTaskTitle]);
 
   const submit = () => {
-    onSubmit(value, (/* newId handled in TaskList */) => {});
+    onSubmit(value, () => {});
     setValue("");
   };
 
